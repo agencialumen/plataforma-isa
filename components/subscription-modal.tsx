@@ -23,7 +23,7 @@ const SUBSCRIPTION_PLANS = [
     ],
     buttonText: "ASSINAR BÁSICO",
     buttonColor: "bg-zinc-700 hover:bg-zinc-600",
-    paymentLink: "https://pay.kirvano.com/edf52b8b-6fba-4d9c-9038-a663ce40f862",
+    paymentLink: "https://pay.kirvano.com/0512bd51-e1ed-4d4f-a036-cca849309899",
   },
   {
     id: "premium",

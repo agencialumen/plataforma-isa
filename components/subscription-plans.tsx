@@ -225,7 +225,7 @@ export default function SubscriptionPlans() {
         ]}
         buttonText="ASSINAR BÁSICO"
         model={<BasicModel />}
-        paymentLink="https://pay.kirvano.com/edf52b8b-6fba-4d9c-9038-a663ce40f862"
+        paymentLink="https://pay.kirvano.com/0512bd51-e1ed-4d4f-a036-cca849309899"
         plan="basic"
       />
 

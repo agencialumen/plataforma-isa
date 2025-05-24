@@ -7,12 +7,12 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { Eye, EyeOff, Lock, Mail, AlertCircle, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { authService } from "@/lib/auth"
 
 export default function AuthPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const paymentId = searchParams?.get("payment_id")
-  const plan = searchParams?.get("plan")
+  const plan = searchParams?.get("plan") || "premium"
 
   const [isLogin, setIsLogin] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -34,23 +34,39 @@ export default function AuthPage() {
 
     try {
       if (isLogin) {
-        // Simular login
-        setSuccess("Login realizado com sucesso!")
+        // Login
+        console.log("🔄 Tentando login...")
+        const result = await authService.signIn(formData.email, formData.password)
+
+        // Verificar se tem assinatura ativa
+        const subscription = await authService.checkUserSubscription(result.user!.id)
+        const subscriptionByEmail = await authService.checkSubscriptionByEmail(result.user!.email!)
+
+        if (!subscription && !subscriptionByEmail) {
+          setError("Você precisa ter uma assinatura ativa para acessar o dashboard. Faça uma compra primeiro.")
+          return
+        }
+
+        setSuccess("✅ Login realizado com sucesso!")
         setTimeout(() => router.push("/dashboard"), 1500)
       } else {
-        // Simular registro
+        // Registro
         if (formData.password !== formData.confirmPassword) {
           throw new Error("As senhas não coincidem")
         }
 
-        if (!paymentId) {
-          throw new Error("ID de pagamento não encontrado. Realize uma compra primeiro.")
+        if (formData.password.length < 6) {
+          throw new Error("A senha deve ter pelo menos 6 caracteres")
         }
 
-        setSuccess("Conta criada com sucesso! Redirecionando...")
-        setTimeout(() => router.push("/dashboard"), 1500)
+        console.log("🔄 Tentando registro...")
+        await authService.signUp(formData.email, formData.password)
+
+        setSuccess("✅ Conta criada! Agora faça uma compra para liberar o acesso.")
+        setError("⚠️ Para acessar o dashboard, você precisa comprar um plano primeiro.")
       }
     } catch (err: any) {
+      console.error("❌ Erro:", err)
       setError(err.message || "Erro inesperado")
     } finally {
       setLoading(false)
@@ -63,7 +79,7 @@ export default function AuthPage() {
       premium: { name: "Premium", price: "R$ 29,90", color: "text-rose-400" },
       diamond: { name: "Diamante", price: "R$ 99,90", color: "text-blue-400" },
     }
-    return plans[plan as keyof typeof plans] || null
+    return plans[plan as keyof typeof plans] || plans.premium
   }
 
   const planInfo = getPlanInfo()
@@ -89,20 +105,18 @@ export default function AuthPage() {
             </motion.div>
 
             <h1 className="text-2xl font-bold text-white mb-2">
-              {isLogin ? "Entrar na Plataforma" : "Criar Sua Conta VIP"}
+              {isLogin ? "Entrar na Plataforma" : "Criar Sua Conta"}
             </h1>
 
-            {planInfo && !isLogin && (
+            {!isLogin && (
               <div className="bg-zinc-700/50 rounded-lg p-3 mb-4">
-                <p className="text-zinc-300 text-sm">Plano selecionado:</p>
-                <p className={`font-bold ${planInfo.color}`}>
-                  {planInfo.name} - {planInfo.price}/mês
-                </p>
+                <p className="text-zinc-300 text-sm">Após criar a conta:</p>
+                <p className="text-rose-400 font-medium">Compre um plano para liberar o acesso</p>
               </div>
             )}
 
             <p className="text-zinc-400 text-sm">
-              {isLogin ? "Acesse seu conteúdo exclusivo" : "Complete seu cadastro para acessar o conteúdo VIP"}
+              {isLogin ? "Acesse seu conteúdo exclusivo" : "Crie sua conta e depois compre um plano"}
             </p>
           </div>
 
@@ -204,7 +218,7 @@ export default function AuthPage() {
               ) : isLogin ? (
                 "Entrar"
               ) : (
-                "Criar Conta VIP"
+                "Criar Conta"
               )}
             </Button>
           </form>
@@ -225,6 +239,17 @@ export default function AuthPage() {
                   Já tem conta? <span className="text-rose-400 font-medium">Fazer login</span>
                 </>
               )}
+            </button>
+          </div>
+
+          {/* Link para voltar */}
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => router.push("/")}
+              className="text-zinc-500 hover:text-zinc-300 text-sm transition-colors"
+            >
+              ← Voltar para a página inicial
             </button>
           </div>
         </div>
