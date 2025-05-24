@@ -33,9 +33,9 @@ const PROFILE_CONFIG = {
       avatar: "/images/followers/neymar.jpg",
     },
     {
-      name: "Bruna Marquezine",
+      name: "Cristiano Ronaldo",
       handle: "@brunamarquezine",
-      avatar: "/images/followers/bruna.jpg",
+      avatar: "/images/followers/cristiano.jpg",
     },
   ],
 }
